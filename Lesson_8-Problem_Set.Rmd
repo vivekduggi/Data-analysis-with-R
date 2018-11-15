@@ -1,0 +1,112 @@
+---
+title: "Lesson 8: Problem set"
+output: html_notebook
+---
+
+
+### Loading dataset
+
+```{r}
+str(diamonds)
+head(diamonds)
+```
+
+### Loading Required libraries
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+```
+
+* Price histogram with facet colors
+
+```{r}
+diamonds %>%
+  ggplot(aes(x = price)) +
+  geom_histogram(aes(fill = cut),color = "black", binwidth = 500) +
+  scale_x_continuous(limits = c(250,19000), breaks = seq(250,19000,3500)) +
+  facet_wrap(~color) +
+  scale_color_brewer(type = "qual")
+```
+
+
+* Price vs table colored by cut
+
+```{r}
+summary(diamonds$table)
+```
+
+
+```{r}
+diamonds %>%
+  ggplot(aes(x = table, y = price)) +
+  geom_point(aes(color = cut)) +
+  scale_x_continuous(limits = c(43,95), breaks = seq(43,95,2)) +
+  scale_color_brewer(type = "qual")
+```
+* Diamond price vs Volume
+
+```{r}
+diamonds$volume <- with(diamonds, x * y * z)
+str(diamonds)
+```
+
+```{r}
+quantile(diamonds$volume, 0.99)
+```
+
+```{r}
+subset(diamonds, volume < 354.4266) %>%
+  ggplot(aes(x = volume, y = price)) +
+  geom_point(aes(color = clarity)) +
+  scale_y_log10(limits = c(250,19000), breaks = seq(250,19000,3000)) +
+  scale_color_brewer(type = "div")
+```
+
+* Proportions of friendships initiated
+
+```{r}
+setwd("F:/Datasets")
+pf <- read.delim("pseudo_facebook.tsv")
+```
+
+```{r}
+names(pf)
+```
+
+```{r}
+pf$prop_initiated <- with(pf, friendships_initiated / friend_count)
+summary(pf$prop_initiated)
+```
+
+* prop_initiated vs tenure
+
+```{r}
+pf$year_joined <- floor(2014 - pf$tenure/365)
+pf$year_joined.bucket <- cut(pf$year_joined, breaks = c(2004,2009,2011,2012,2014))
+```
+
+```{r}
+pf %>%
+  ggplot(aes(x = tenure, y = prop_initiated)) +
+  #geom_line(aes(color = year_joined.bucket), stat = "summary", fun.y = median) +
+  geom_smooth(aes(color = year_joined.bucket) ,stat = "smooth")
+```
+
+
+```{r}
+summary(pf$prop_initiated[pf$year_joined.bucket == "(2012,2014]"])
+```
+
+
+* Price / Carat binned, faceted and colored
+
+```{r}
+diamonds %>%
+  ggplot(aes(x = cut, y = price/carat)) +
+  geom_point(aes(color = color)) +
+  facet_wrap(~clarity) +
+  scale_color_brewer(type = 'div')
+```
+
